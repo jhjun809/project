@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bitc.mapper.CommentMapper">
+<insert id="insertComment" parameterType="com.bitc.dto.CommentDto" >
+<![CDATA[ 
+	insert into
+		comment 
+			(news_comment,creator_id)
+		value
+			(#{newsComment},#{creatorId})
+]]>
+</insert >
+<select id="selectCommentList" resultType="com.bitc.dto.CommentDto">
+<![CDATA[
+	select
+		news_comment, comment_idx, creator_id
+	from
+		comment
+	where news_comment != "null"	
+ ]]>
+</select >
+<delete id="deleteComment" parameterType="int">
+<![CDATA[
+delete 
+from 
+	comment 
+where 
+	comment_idx=#{commentIdx};
+
+ ]]>
+</delete >
+</mapper>

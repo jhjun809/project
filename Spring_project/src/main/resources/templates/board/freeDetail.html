@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>상세 글보기</title>
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+	$(document).ready(function() {
+		var idx = $("#boardIdx").val();
+		/* 목록으로 */
+		$("#btn-list").on("click", function() {
+			location.href = "/teamTwo/free/";
+		});
+		/* 수정 */
+		$("#btn-edit").on("click", function() {
+			$("#method").val("PUT");
+			var frm = $("#frm")[0];
+			frm.action = "/teamTwo/free/" + idx;
+			frm.submit();
+		});
+		/* 삭제 */
+		$("#btn-del").on("click", function() {
+			$("#method").val("DELETE");
+			var frm = $("#frm")[0];
+			frm.action = "/teamTwo/free/" + idx;
+			frm.submit();
+		});
+
+		/* 관리자 삭제 버튼 */
+		$("#btn-delete").on("click", function() {
+			$("#method").val("DELETE");
+			var frm = $("#frm")[0];
+			frm.action = "/teamTwo/free/" + idx;
+			frm.submit();
+		});
+	});
+	
+	$(document).ready(function() {
+		var commentIdx = 0;
+		
+		$(".btn-del").on("click", function() {
+			commentIdx = $(this).children("span").text();
+			$("#method").val("DELETE");
+			var frm = $("#frm")[0];
+			frm.action = "/teamTwo/freeComment/" + commentIdx;
+			frm.submit();
+		});
+	});
+</script>
+<style>
+#st {
+	font-weight: bold;
+}
+
+#title {
+	border: 0px;
+	border-bottom: 3px solid rgb(139, 0, 0);;
+}
+</style>
+</head>
+<body>
+
+	<header>
+		<div id="header" th:include="layout/header :: header"></div>
+	</header>
+	<header>
+		<div class="container text-center mt-5">
+			<div class="row">
+				<div class="col-3"></div>
+				<div class="col-6 justify-content-center">
+					<!-- <h3>작성글</h3> -->
+					<!-- <hr style="height: 3px; color: red;"> -->
+				</div>
+			</div>
+		</div>
+	</header>
+	<main>
+		<div class="container">
+			<div>
+				<form id="frm" method="POST">
+					<div class="border p-4">
+						<div>
+							<input type="hidden" id="boardIdx" name="boardIdx"
+								th:value="${board.boardIdx}"><input type="hidden"
+								id="creatorId" name="creatorId" th:value="${session.userId}"><input
+								type="hidden" id="method" name="_method">
+						</div>
+						<div class=" ms-3">
+
+							<div class="row mb-1 me-5 ms-4">
+								<div class="col-1 ms-5">
+									<p class="mt-2 h2 mb-3">제목:</p>
+								</div>
+								<div class="col">
+									<!-- 제목 -->
+									<input type="text" class="form-control-plaintext h2 mb-2"
+										id="title" name="title" placeholder="제목을 입력해주세요."
+										th:value="${board?.title}">
+								</div>
+							</div>
+						</div>
+						<div class="border">
+							<div class="row">
+								<div class="col-4 mt-2">
+									<div class="row">
+										<div class="mt-2 ms-5" th:text="|작성자 : ${board.creatorId}|"
+											id="st"></div>
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="form-floating my-3">
+										<div th:text="|날짜 : ${board.createdDt}|" id="st"></div>
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="form-floating my-3">
+										<div th:text="|조회수 : ${board.hitCnt}|" id="st"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div class="row container mx-auto">
+							<div class="form-floating my-3 border ">
+								<!-- <div class="col-1"></div> -->
+								<div class="card row container fluid my-2 d-flex justify-content-center align-items-center"
+									th:each="files:${board.fileList}">
+									<div class="col-2"></div>
+									<div class="col-8 ">
+										<img class="img-fluid"
+										th:src="@{'/' + ${files.storedFilePath}}"
+										data-bs-target="@{'/' + ${files.storedFilePath}}">
+									</div>
+									<div class="col-2"></div>
+								</div>
+								<textarea rows="10" class="form-control-plaintext ms-3 my-3"
+									id="contents" name="contents" placeholder="내용을 입력해주세요."
+									th:text="${board.contents}"></textarea>
+							</div>
+							</div>
+						</div>
+
+						<!-- 첨부파일 -->
+						<div class="row my-3">
+							<div class="col">
+								<a th:each="file : ${board.fileList}"
+									th:href="@{/teamTwo/free/downloadFile(fileIdx=${file.fileIdx},boardIdx=${file.boardIdx})}"
+									th:text="|${file.originalFileName}(${file.fileSize} kb) |"></a>
+							</div>
+						</div>
+					</div>
+
+
+
+					<!-- 버튼 -->
+					<div class="clearfix my-3 mt-5 me-5">
+						<button type="button" class="btn btn-secondary float-start"
+							id="btn-list">목록으로</button>
+
+						<!-- 관리자 아이디로 로그인시에만 삭제 버튼이 뜨게 함 -->
+						<div th:if="${session.userId} == tester">
+							<button type="button"
+								class="btn btn-danger float-center me-5 ms-4" id="btn-delete">관리자
+								삭제</button>
+						</div>
+						<!-- 글작성한 아이디로 로그인시에만 삭제 수정 버튼이 뜨게 함 -->
+						<div th:if="${session.userId} == |${board.creatorId}|">
+							<button type="button" id="btn-del"
+								class="btn btn-danger float-end">
+								삭제 <span th:text="${board.boardIdx}" class="d-none"></span>
+							</button>
+							<button type="button" id="btn-edit"
+								class="btn btn-warning float-end me-3">
+								수정 <span th:text="${board.boardIdx}" class="d-none"></span>
+							</button>
+						</div>
+					</div>
+					<!-- 버튼 끝 -->
+
+					<!-- 폼 끝-->
+				</form>
+
+
+				<h4><strong>댓글</strong></h4>
+				<table th:if="${#lists.size(comm)}>0" th:each="list : ${comm}"
+					class="mb-2">
+					<colgroup>
+						<col width="0%"/>
+						<col width="20%"/>
+						<col width="80%"/>
+					</colgroup>
+					<tr>
+						<td><input type="hidden" id="commentIdx" name="commentIdx"
+							class="form-control-plaintext" th:value="${list.commentIdx}"></td>
+						<td><div id="noComment" class="fw-bold" th:text="|작성자(${list.creatorId}): |"></div></td>
+						<td><div id="noComment" th:text="${list.freeComment}"></div></td>
+						<td
+							th:if=" ${session.userId} == tester">
+							<button type="button" class="btn btn-danger btn-del float-end" id="btn-del">
+								x <span th:text="${list.commentIdx}" class="d-none"></span>
+							</button>
+						</td>
+					</tr>
+				</table>
+
+
+				<form method="POST" action="/teamTwo/freeInsertComment" class="my-4">
+					<input type="text" name="freeComment" placeholder="댓글을 남겨주세요."
+						class="form-control"> <input type="hidden"
+						name="creatorId" th:value="${session.userId}">
+					<div class="float-end mb-1">
+						<button type="submit" class="btn btn-info mt-1">Post</button>
+
+					</div>
+
+				</form>
+			</div>
+		</div>
+	</main>
+	<footer>
+		<div id="footer" th:include="layout/footer :: footer"></div>
+	</footer>
+
+</body>
+</html>
